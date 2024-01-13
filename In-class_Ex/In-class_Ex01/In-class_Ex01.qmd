@@ -1,0 +1,6 @@
+---
+title: "In-class Exercise 1"
+author: "Chrissandro"
+date: "13 January 2024"
+date-modified: "last-modified"
+---

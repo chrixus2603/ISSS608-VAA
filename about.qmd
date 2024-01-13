@@ -2,8 +2,6 @@
 title: "About"
 ---
 
-About this site
+Still Work in Progress! Stay tuned ;)
 
-```{r}
-1 + 1
-```
+![](images/Cinnamoroll2Bbackground.webp)
