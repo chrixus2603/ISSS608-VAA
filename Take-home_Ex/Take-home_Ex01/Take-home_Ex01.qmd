@@ -1,0 +1,68 @@
+---
+title: "Take-home Exercise 1"
+author: "Chrissandro"
+date: "14 January 2024"
+date-modified: "last-modified"
+execute:
+  eval: true
+  echo: true
+  warning: false
+editor: visual
+---
+
+# 1. Project Overview
+
+## 1.1. Setting the Scene
+
+OECD education director Andreas Schleicher shared that *"Singapore managed to achieve excellence without wide differences between children from wealthy and disadvantaged families"*. Singapore's Minister for Education shares the same belief, starting an *"every school a good school"* slogan. However, the population of Singapore disagrees that disparities don't exist, especially **between elite and neighborhood schools; students from higher socioeconomic status families and lower ones; and immigration and non-immigration families**.
+
+## 1.2. The Task
+
+Based on the dataset provided by the 2022 Programme for International Student Assessment (PISA), the aim of this exercise is to utilize appropriate **Exploratory Data Analysis (EDA)** methods and **ggplot2** functions to reveal:
+
+-   the distribution of Singapore students' performance in mathematics, reading, and science, and
+
+-   the relationship between these performances with schools, gender and socioeconomic status of the students.
+
+# 2. Data Preparation
+
+## 2.1 Installing R packages
+
+In this take-home exercise, two R packages will be used. They are:
+
+-   [tidyverse](https://www.tidyverse.org/), and
+
+-   [haven](https://www.haven.tidyverse.org/)
+
+The code chunk used is as follow:
+
+```{r}
+pacman::p_load(tidyverse, haven)
+```
+
+## 2.2 Importing PISA data
+
+The code chunk below uses [`read_sas()`](https://www.haven.tidyverse.org/reference/read_sas.html) of [haven](https://www.haven.tidyverse.org/) to import PISA data into R environment.
+
+```{r}
+stu_qqq <- read_sas("data/cy08msp_stu_qqq.sas7bdat")
+```
+
+To retrieve only relevant data (Singapore-based), the *filter* argument is used as seen in the code chunk below.
+
+```{r}
+stu_qqq_SG <- stu_qqq %>%
+  filter(CNT == "SGP")
+```
+
+Then, the *write_rds* function will generate a new .rds file to be used for consequent EDAs.
+
+```{r}
+write_rds(stu_qqq_SG,
+          "data/stu_qqq_SG.rds")
+```
+
+```{r}
+stu_qqq_SG <-
+  read_rds("data/stu_qqq_SG.rds")
+```

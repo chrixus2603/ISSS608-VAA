@@ -222,5 +222,40 @@
     "title": "In-class Exercise 1: Now You See It!",
     "section": "Importing PISA data",
     "text": "Importing PISA data\nThe code chunk below uses read_sas() of haven to import PISA data into R environment.\n\nstu_qqq &lt;- read_sas(\"data/cy08msp_stu_qqq.sas7bdat\")\n\n\nstu_qqq_SG &lt;- stu_qqq %&gt;%\n  filter(CNT == \"SGP\")\n\n\nwrite_rds(stu_qqq_SG,\n          \"data/stu_qqq_SG.rds\")\n\n\nstu_qqq_SG &lt;-\n  read_rds(\"data/stu_qqq_SG.rds\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html",
+    "title": "Take-home Exercise 1",
+    "section": "",
+    "text": "OECD education director Andreas Schleicher shared that “Singapore managed to achieve excellence without wide differences between children from wealthy and disadvantaged families”. Singapore’s Minister for Education shares the same belief, starting an “every school a good school” slogan. However, the population of Singapore disagrees that disparities don’t exist, especially between elite and neighborhood schools; students from higher socioeconomic status families and lower ones; and immigration and non-immigration families.\n\n\n\nBased on the dataset provided by the 2022 Programme for International Student Assessment (PISA), the aim of this exercise is to utilize appropriate Exploratory Data Analysis (EDA) methods and ggplot2 functions to reveal:\n\nthe distribution of Singapore students’ performance in mathematics, reading, and science, and\nthe relationship between these performances with schools, gender and socioeconomic status of the students."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#setting-the-scene",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#setting-the-scene",
+    "title": "Take-home Exercise 1",
+    "section": "",
+    "text": "OECD education director Andreas Schleicher shared that “Singapore managed to achieve excellence without wide differences between children from wealthy and disadvantaged families”. Singapore’s Minister for Education shares the same belief, starting an “every school a good school” slogan. However, the population of Singapore disagrees that disparities don’t exist, especially between elite and neighborhood schools; students from higher socioeconomic status families and lower ones; and immigration and non-immigration families."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#the-task",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#the-task",
+    "title": "Take-home Exercise 1",
+    "section": "",
+    "text": "Based on the dataset provided by the 2022 Programme for International Student Assessment (PISA), the aim of this exercise is to utilize appropriate Exploratory Data Analysis (EDA) methods and ggplot2 functions to reveal:\n\nthe distribution of Singapore students’ performance in mathematics, reading, and science, and\nthe relationship between these performances with schools, gender and socioeconomic status of the students."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#installing-r-packages",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#installing-r-packages",
+    "title": "Take-home Exercise 1",
+    "section": "2.1 Installing R packages",
+    "text": "2.1 Installing R packages\nIn this take-home exercise, two R packages will be used. They are:\n\ntidyverse, and\nhaven\n\nThe code chunk used is as follow:\n\npacman::p_load(tidyverse, haven)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#importing-pisa-data",
+    "href": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html#importing-pisa-data",
+    "title": "Take-home Exercise 1",
+    "section": "2.2 Importing PISA data",
+    "text": "2.2 Importing PISA data\nThe code chunk below uses read_sas() of haven to import PISA data into R environment.\n\nstu_qqq &lt;- read_sas(\"data/cy08msp_stu_qqq.sas7bdat\")\n\nTo retrieve only relevant data (Singapore-based), the filter argument is used as seen in the code chunk below.\n\nstu_qqq_SG &lt;- stu_qqq %&gt;%\n  filter(CNT == \"SGP\")\n\nThen, the write_rds function will generate a new .rds file to be used for consequent EDAs.\n\nwrite_rds(stu_qqq_SG,\n          \"data/stu_qqq_SG.rds\")\n\n\nstu_qqq_SG &lt;-\n  read_rds(\"data/stu_qqq_SG.rds\")"
   }
 ]
