@@ -34,13 +34,15 @@ In this take-home exercise, these R packages will be used:
 
 -   [haven](https://www.haven.tidyverse.org/)
 
--   ggrepel: an R package provides geoms for ggplot2 to repel overlapping text labels
+-   dplyr
 
--   ggthemes: an R package provides some extra themes, geoms, and scales for 'ggplot2'
+-   ggrepel: provides geoms for ggplot2 to repel overlapping text labels
 
--   hrbrthemes: an R package provides typography-centric themes and theme components for ggplot2
+-   ggthemes: provides some extra themes, geoms, and scales for 'ggplot2'
 
--   patchwork: an R package for preparing composite figure created using ggplot2
+-   hrbrthemes: provides typography-centric themes and theme components for ggplot2
+
+-   patchwork: package for preparing composite figure created using ggplot2
 
 The code chunk used is as follows:
 
@@ -88,29 +90,204 @@ Few columns will be selected to be used for the EDA, these are:
 
 -   **ST004D01T** (gender: 1 being female, 2 being male),
 
--   **PV1MATH** (math: Plausible value of student's mathematic score),
+-   **PVxMATH** (math: Average of 10 plausible values of student's mathematic score),
 
--   **PV1READ** (read: Plausible value of student's reading score),
+-   **PVxREAD** (read: Average of 10 plausible values of student's reading score),
 
--   **PV1SCIE** (scie: Plausible value of student's science score).
+-   **PVxSCIE** (scie: Average of 10 plausible value of student's science score),
+
+-   **ESCS** (escs: Value of socioeconomic standing).
 
 Also, **school_ID** and **gender** variables are categorical in nature. These variables are casted as factors using *as.factor()*. For **gender**, the values are renamed to "Female" and "Male" for better readibiity.
 
 ```{r}
-#| code-fold: true
-#| code-summary: Show code
 stu_data <- stu_qqq_SG %>%
-  select(CNTSCHID, ST004D01T, PV1MATH, PV1READ, PV1SCIE) %>%
-  rename(c(school_ID = "CNTSCHID", math = "PV1MATH", read = "PV1READ", scie = "PV1SCIE",
-           gender = "ST004D01T"))
+  select(CNTSCHID, ST004D01T, ESCS) %>%
+  rename(c(school_ID = "CNTSCHID",
+           gender = "ST004D01T",
+           escs = "ESCS"))
 
 stu_data$school_ID <- as.factor(stu_data$school_ID)
 stu_data$gender <- factor(stu_data$gender, levels = c(1, 2), labels = c("Female", "Male"))
+stu_data$math <- rowMeans(stu_qqq_SG[, c("PV1MATH", "PV2MATH","PV3MATH", "PV4MATH", "PV5MATH",
+                                         "PV6MATH", "PV7MATH", "PV8MATH", "PV9MATH", "PV10MATH")],
+                          na.rm = TRUE)
+stu_data$read <- rowMeans(stu_qqq_SG[, c("PV1READ", "PV2READ","PV3READ", "PV4READ", "PV5READ",
+                                         "PV6READ", "PV7READ", "PV8READ", "PV9READ", "PV10READ")],
+                          na.rm = TRUE)
+stu_data$scie <- rowMeans(stu_qqq_SG[, c("PV1SCIE", "PV2SCIE","PV3SCIE", "PV4SCIE", "PV5SCIE",
+                                         "PV6SCIE", "PV7SCIE", "PV8SCIE", "PV9SCIE", "PV10SCIE")],
+                          na.rm = TRUE)
 ```
+
+## 2.4 Data Preview
+
+:::panel-tabset
+
+## Dataset structure
+```{r}
+str(stu_data)
+```
+
+## Dataset health
+
+```{r}
+stu_data[duplicated(stu_data),]
+```
+
+No duplicated rows are found.
+
+```{r}
+sum(is.na(stu_data))
+```
+
+47 NA responses are detected. Using the *summary()* function, the columns with NA responses can be ascertained.
+
+```{r}
+summary(stu_data)
+```
+
+All 47 NA responses are found in the **escs** column. Let's remove those from our subsequent analysis.
+
+```{r}
+stu_data <- stu_data[!is.na(stu_data$escs), ]
+```
+
+The data is now ready to be visualized!
+:::
 
 # 3. Exploratory Data Analysis
 
-## 3.1 Student's academic performance in relation to gender
+## 3.1 Distribution of student's performance in each subject
+
+In my analysis, I created three separate histogram plots to examine the distribution of student performance across three distinct subjects: mathematics, reading, and science.
+
+```{r}
+#| code-fold: true
+#| code-summary: Show code
+p1 <- ggplot(data = stu_data,
+       aes(x = math)) +
+  geom_histogram(bins=30,
+                 color = "grey50",
+               fill = "#20c3f5") +
+  geom_vline(
+    aes(xintercept = median(math)),
+    colour="salmon", 
+    linewidth = 0.5, 
+    linetype = "dashed"
+  ) +
+  geom_vline(
+    aes(xintercept = mean(math)),
+    colour="cadetblue", 
+    linewidth = 0.5, 
+    linetype = "dashed"
+  ) +
+  annotate(
+    geom = "text", 
+    x = 800, 
+    y = 900,
+    label = paste("Median"),
+    color = "salmon"
+  ) +
+  annotate(
+    geom = "text", 
+    x = 800, 
+    y = 800,
+    label = paste("Mean"),
+    color = "cadetblue"
+  ) +
+  xlim(c(0, 900)) +
+  ylim(c(0, 1000)) +
+  labs(x = "Score", y = "Count", title = "Mathematics") +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank())
+
+p2 <- ggplot(data = stu_data,
+       aes(x = read)) +
+  geom_histogram(bins=30,
+                 color = "grey50",
+               fill = "#20c3f5") +
+  geom_vline(
+    aes(xintercept = median(math)),
+    colour="salmon", 
+    linewidth = 0.5, 
+    linetype = "dashed"
+  ) +
+  geom_vline(
+    aes(xintercept = mean(math)),
+    colour="cadetblue", 
+    linewidth = 0.5, 
+    linetype = "dashed"
+  ) +
+  annotate(
+    geom = "text", 
+    x = 800, 
+    y = 900,
+    label = paste("Median"),
+    color = "salmon"
+  ) +
+  annotate(
+    geom = "text", 
+    x = 800, 
+    y = 850,
+    label = paste("Mean"),
+    color = "cadetblue"
+  ) +
+  xlim(c(0, 900)) +
+  ylim(c(0, 1000)) +
+  labs(x = "Score", y = "Count", title = "Reading") +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank())
+
+p3 <- ggplot(data = stu_data,
+       aes(x = scie)) +
+  geom_histogram(bins=30,
+                 color = "grey50",
+               fill = "#20c3f5") +
+  geom_vline(
+    aes(xintercept = median(math)),
+    colour="salmon", 
+    linewidth = 0.5, 
+    linetype = "dashed"
+  ) +
+  geom_vline(
+    aes(xintercept = mean(math)),
+    colour="cadetblue", 
+    linewidth = 0.5, 
+    linetype = "dashed"
+  ) +
+  annotate(
+    geom = "text", 
+    x = 800, 
+    y = 900,
+    label = paste("Median"),
+    color = "salmon"
+  ) +
+  annotate(
+    geom = "text", 
+    x = 800, 
+    y = 800,
+    label = paste("Mean"),
+    color = "cadetblue"
+  ) +
+  xlim(c(0, 900)) +
+  ylim(c(0, 1000)) +
+  labs(x = "Score", y = "Count", title = "Science") +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank())
+
+(p1 / p3 ) | p2
+```
+
+ Each histogram reveals a **slight left skew in the distribution**, indicating that a majority of students are achieving above-average scores in these subjects. This leftward skewness is particularly noteworthy as it suggests that fewer students are scoring at the lower end of the spectrum. The **variance for each performance is also substantial**, which could indicate a notable difference of disparity in performance in between students. This can be a result of several factors such as schools, genders, and socioeconomic status.
+
+## 3.2 Student's academic performance in relation to gender
 
 To start, three boxplots are generated from the code chunks below to show the performance of students of both genders in three different subjects: Mathematics, Reading, and Science.
 
@@ -121,14 +298,17 @@ To start, three boxplots are generated from the code chunks below to show the pe
 gendermath <- ggplot(data = stu_data,
        aes(x = gender,
            y = math)) +
-  geom_boxplot(color="grey50",
-               fill="#20c3f5") +
+  geom_boxplot(color="#20c3f5") +
   geom_point(stat="summary",        
              fun.y="mean",           
              colour ="red",          
              size=3) +
   ylim(0,1000) +
-  labs(x = "", y = "Score", title = "Mathematics", axis.title.y = element_blank())
+  labs(x = "", y = "Score", title = "Mathematics", axis.title.y = element_blank()) +
+    theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank())
 ```
 
 ## Reading
@@ -137,15 +317,20 @@ gendermath <- ggplot(data = stu_data,
 genderread <- ggplot(data = stu_data,
        aes(x = gender,
            y = read)) +
-  geom_boxplot(color="grey50",
-               fill="#20c3f5") +
+  geom_boxplot(color="#20c3f5") +
   geom_point(stat="summary",        
              fun.y="mean",           
              colour ="red",          
              size=3) +
   ylim(0,1000) +
-  labs(x = "", title = "Reading") +
-  theme(axis.text.y = element_blank(), axis.title.y = element_blank())
+  labs(x = "Gender", title = "Reading") +
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        panel.background = element_rect(fill="white",colour="white"),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank())
 ```
 
 ## Science
@@ -154,45 +339,42 @@ genderread <- ggplot(data = stu_data,
 gendersci <- ggplot(data = stu_data,
        aes(x = gender,
            y = scie)) +
-  geom_boxplot(color="grey50",
-               fill="#20c3f5") +
+  geom_boxplot(color="#20c3f5") +
   geom_point(stat="summary",        
              fun.y="mean",           
              colour ="red",          
              size=3) +
   ylim(0,1000) +
   labs(x = "", title = "Science") +
-  theme(axis.text.y = element_blank(), axis.title.y = element_blank())
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        panel.background = element_rect(fill="white",colour="white"),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank())
 ```
 :::
 
 In order to show a side-by-side comparison of all 3 subjects' boxplots, the patchwork package is utilized as shown in the code chunk below, where the three assigned boxplots can simply be added to each other.
 
-::: panel-tabset
-## Code
-
 ```{r}
-#| eval: false
+#| code-fold: true
+#| code-summary: Show code
 gendermath + genderread + gendersci
 ```
-
-## Plot
-
-```{r}
-#| echo: false
-gendermath + genderread + gendersci
-```
-:::
 
 Based on the boxplots, some observations can be made:
 
--   Male students outperforms the female students in Mathematics and Science, while the female students scored higher in Reading compared to male students.
+-   Male students slightly outperforms the female students in Mathematics and Science, while the female students scored higher in Reading compared to male students.
 
 -   The **means** and **medians** for each subject are approximately the same across both genders.
 
 -   Many low-scoring outliers can be observed in Reading and Science subjects across both genders.
 
-## 3.2 The comparison of students' performance between schools
+Ultimately, the data visualization shows that **gender doesn't have an impact in students' performance**.
+
+## 3.3 The comparison of students' performance between schools
 
 The code chunk below creates a new data set to find the average grades of each subject for each school by using the *group_by()* function.
 
@@ -229,9 +411,13 @@ schmath <- ggplot(data = stu_data_sch,
     label = paste("Median"),
     color = "salmon"
   ) +
-  ylim(0, 35) +
+  ylim(0, 40) +
   xlim(300,900) +
-  labs(x = "", y = "Count", title = "Mathematics")
+  labs(x = "", y = "Count", title = "Mathematics") +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank())
 
 schread <- ggplot(data = stu_data_sch,
        aes(x = average_read)) +
@@ -251,10 +437,15 @@ schread <- ggplot(data = stu_data_sch,
     label = paste("Median"),
     color = "salmon"
   ) +
-    ylim(0, 35) +
+    ylim(0, 40) +
     xlim(300,900) +
-  labs(x = "Average Score", title = "Reading") +
-    theme(axis.text.y = element_blank(), axis.title.y = element_blank())
+  labs(x = "Average Score", y = "", title = "Reading") +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank())
 
 schsci <- ggplot(data = stu_data_sch,
        aes(x = average_scie)) +
@@ -274,12 +465,17 @@ schsci <- ggplot(data = stu_data_sch,
     label = paste("Median"),
     color = "salmon"
   ) +
-    ylim(0, 35) +
+    ylim(0, 40) +
     xlim(300,900) +
-  labs(x = "", title = "Science") +
-    theme(axis.text.y = element_blank(), axis.title.y = element_blank())
+  labs(x = "", y = "", title = "Science") +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank())
 
-schmath + schread + schsci
+schmath | schread | schsci
 ```
 
 To show if the difference of average grades between schools exist, the absolute value between the average grade of each school subtracted by the average grade of the whole school combined can be extracted as shown in the code chunk below.
@@ -287,10 +483,10 @@ To show if the difference of average grades between schools exist, the absolute 
 ```{r}
 stu_data_sch_diff <- stu_data_sch %>%
   group_by(school_ID) %>%
-  mutate(average_math_diff = abs(mean(stu_qqq_SG$PV1MATH)-average_math),
-         average_science_diff = abs(mean(stu_qqq_SG$PV1SCIE)-average_scie),
-         average_read_diff = abs(mean(stu_qqq_SG$PV1READ)-average_read)) %>%
-  select(school_ID, average_math_diff, average_science_diff, average_read_diff) %>%
+  mutate(average_math_diff = abs(mean(stu_data$math)-average_math),
+         average_read_diff = abs(mean(stu_data$read)-average_read),
+         average_scie_diff = abs(mean(stu_data$scie)-average_scie)) %>%
+  select(school_ID, average_math_diff, average_read_diff, average_scie_diff) %>%
   unique()
 ```
 
@@ -300,8 +496,10 @@ The differences for each subject can then be plotted as seen below.
 #| code-fold: true
 #| code-summary: Show code
 p1 <- ggplot(data = stu_data_sch_diff,
-       aes(y = average_math_diff)) +
-  geom_boxplot() +
+       aes(y = average_math_diff,
+           x = 0)) +
+  geom_violin() +
+  geom_boxplot(color  = "#20c3f5") +
   stat_summary(aes(x = 0),
                geom = "point",       
                fun.y = "mean",         
@@ -309,12 +507,17 @@ p1 <- ggplot(data = stu_data_sch_diff,
                size = 3) +
   xlim(c(-0.5,0.5)) +
   ylim(c(0,220)) +
-  scale_x_continuous(NULL, breaks = NULL) +
-  theme_minimal()
+  scale_x_continuous("Mathematics", breaks = NULL) +
+    labs(x = "Mathematics", y = "Score difference", title = "") +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank())
 
 p2 <- ggplot(data = stu_data_sch_diff,
-       aes(y = average_read_diff)) +
-  geom_boxplot(width = 0.1) +
+       aes(y = average_read_diff,
+           x = 0)) +
+  geom_violin() +
+  geom_boxplot(color = "#20c3f5") +
   stat_summary(aes(x = 0),
                geom = "point",       
                fun.y = "mean",         
@@ -322,12 +525,20 @@ p2 <- ggplot(data = stu_data_sch_diff,
                size = 3) +
   xlim(c(-0.5,0.5)) +
   ylim(c(0,220)) +
-  scale_x_continuous(NULL, breaks = NULL) +
-  theme_minimal()
+  scale_x_continuous("Reading", breaks = NULL) +
+    labs(x = "", y = "", title = "") +
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        panel.background = element_rect(fill="white",colour="white"),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank())
 
 p3 <- ggplot(data = stu_data_sch_diff,
-       aes(y = average_science_diff)) +
-  geom_boxplot(width = 0.1) +
+       aes(y = average_scie_diff,
+           x = 0)) +
+  geom_violin() +
+  geom_boxplot(color = "#20c3f5") +
   stat_summary(aes(x = 0),
                geom = "point",       
                fun.y = "mean",         
@@ -335,18 +546,120 @@ p3 <- ggplot(data = stu_data_sch_diff,
                size = 3) +
   xlim(c(-0.5,0.5)) +
   ylim(c(0,220)) +
-  scale_x_continuous(NULL, breaks = NULL) +
-  theme_minimal()
+  scale_x_continuous("Science", breaks = NULL) +
+    labs(x = "", y = "", title = "") +
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        panel.background = element_rect(fill="white",colour="white"),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank())
 
 p1 + p2 + p3
 ```
 
 Based on the boxplots, some observations can be made:
 
-- All three subjects show slight amount of disparity in average grades between schools, with the average difference value around 50.
+- All three subjects show slight amount of disparity in average grades between schools, with the average difference value around 50. This proves that the performance between schools in each subject are not the same.
 
 - Some outliers are detected in all three boxplots, showing that a few schools in Singapore either excels or underperforms in terms of the respective subjects.
 
-## 3.3 
+- The Q3 of the boxplots lie around the 70 point mark, meaning that almost 75% of schools in Singapore are placed between 0-70 point differences to the national average.
 
+## 3.4 Student's performance in regards to their household's socioeconomic status
 
+To see if there's any correlation between a student's performance and their socioeconomic value (ESCS), a scatterplot for each subject is generated to check for any linearity. Beforehand, let's check for the summary of the ESCS data.
+
+```{r}
+summary(stu_data$escs)
+```
+
+Here, no NA responses are found because they are already removed beforehand. Then, the distribution of ESCS between students is plotted below.
+
+```{r}
+#| code-fold: true
+#| code-summary: Show code
+ggplot(data = stu_data,
+       aes(x = escs)) +
+  geom_histogram(bins=30,
+                 color = "grey50",
+                 fill = "#20c3f5") +
+  geom_vline(
+    aes(xintercept = median(escs)),
+    colour="salmon", 
+    linewidth = 0.8, 
+    linetype = "dashed"
+  ) +
+  annotate(
+    geom = "text", 
+    x = 0, 
+    y = 780,
+    label = paste("Median"),
+    color = "salmon"
+  ) +
+  labs(x = "ESCS", y = "Count", title = "ESCS Distribution") +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank())
+```
+
+The histogram shows a **left skewed distribution**, which might indicate that **students with normal to high ESCS value are more prevalent than those with low ESCS**. 
+
+Next, the scatterplots are generated below with the calculation of linearity.
+
+```{r}
+#| code-fold: true
+#| code-summary: Show code
+cor_math <- round(cor(stu_data$math, stu_data$escs),2)
+cor_read <- round(cor(stu_data$read, stu_data$escs),2)
+cor_scie <- round(cor(stu_data$scie, stu_data$escs),2)
+
+p1 <- ggplot(data = stu_data,
+       aes(y = math,
+           x = escs)) +
+  geom_point(size=0.1) +
+  labs(x = "ESCS", y = "Math", title = "") +
+  geom_smooth(method=lm, 
+              size=0.5) +
+  annotate("text", x=2.8, y=600, label=paste0("r = ", cor_math), color = 'red') +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank())
+
+p2 <- ggplot(data = stu_data,
+       aes(y = read,
+           x = escs)) +
+  geom_point(size=0.1) +
+  labs(x = "ESCS", y = "Reading", title = "") +
+  geom_smooth(method=lm, 
+              size=0.5) +
+  annotate("text", x=2.8, y=600, label=paste0("r = ", cor_read), color = 'red') +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank())
+
+p3 <- ggplot(data = stu_data,
+       aes(y = scie,
+           x = escs)) +
+  geom_point(size=0.1) +
+  labs(x = "ESCS", y = "Science", title = "") +
+  geom_smooth(method=lm, 
+              size=0.5) +
+  annotate("text", x=2.8, y=600, label=paste0("r = ", cor_scie), color = 'red') +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank())
+
+p1 / p2 / p3
+```
+
+In the provided scatterplot graphs for each subject, a **correlation of r = 0.44** is evident between a student's score in the respective subjects and their Economic, Social, and Cultural Status (ESCS), which indicate weak to medium positive correlation.
+
+# 4. Conclusion
+
+To conclude, our exploratory data analysis (EDA), leveraging several different data visualization plots, have provided instights into student performance across math, science, and reading. These visualizations have illuminated not just the performance spread within each subject, but also the nuanced interplay between student performance and variables like gender, school affiliation, and socioeconomic status as gauged by the Economic, Social, and Cultural Status (ESCS) value. 
+
+One finding is that **gender was found to have no significant influence on performance across the subjects**. However, a distinct variation in average scores between schools emerged, indicating that **there's inequality between the performance of each school**. Moreover, the ESCS was observed to have a small to medium influence on performance, with a correlation coefficient of 0.44, suggesting that while **socioeconomic status does impact academic achievement, it is not the sole determinant**.
+
+This analysis underscores the complexity of educational achievement and the pivotal roles both institutional characteristics and socioeconomic factors play, advocating for educational policies that address these dimensions.
