@@ -558,5 +558,12 @@
     "title": "In-class Exercise 1: Now You See It!",
     "section": "Importing PISA data",
     "text": "Importing PISA data\nThe code chunk below uses read_sas() of haven to import PISA data into R environment.\n\nstu_qqq &lt;- read_sas(\"data/cy08msp_stu_qqq.sas7bdat\")\n\n\nstu_qqq_SG &lt;- stu_qqq %&gt;%\n  filter(CNT == \"SGP\")\n\n\nwrite_rds(stu_qqq_SG,\n          \"data/stu_qqq_SG.rds\")\n\n\nstu_qqq_SG &lt;-\n  read_rds(\"data/stu_qqq_SG.rds\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html",
+    "href": "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html",
+    "title": "Take-home Exercise 2: DataViz Makeover",
+    "section": "",
+    "text": "1. Overview\nIn this take-home exercise, my goal is to apply what I have learned through the first two weeks of my Visual Analytics & Applications class such as different design practices and principles of DataViz and try to improve upon a fellow classmate’s data visualization in their Take-home Exercise 1 in both aesthetic and clarity.\n\n\n2."
   }
 ]

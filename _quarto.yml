@@ -3,12 +3,12 @@ project:
 
 website:
   title: "Chrissandro's VAA page"
-  image: "images/navbar-title-cinam.png"
-  favicon: "images/navbar-title-cinam.png"
+  image: "images/hiclipart.com.png"
+  favicon: "images/hiclipart.com.png"
   page-navigation: true
   navbar:
-    logo: "images/navbar-title-cinam.png"
-    title: false
+    logo: "images/hiclipart.com.png"
+    title: "ISSS608-VAA"
     collapse-below: lg
     search: true
     left:
@@ -30,6 +30,11 @@ website:
       menu:
         - text: "Take-home Exercise 1"
           href: "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html"
+        - text: "Take-home Exercise 2"
+          href: "Take-home_Ex/Take-home_Ex02/Take-home_Ex02.html"
+    - text: "Group Project"
+      menu:
+        - text: "Work-in-Progress"
     right:
       - href: index.qmd
         text: Home

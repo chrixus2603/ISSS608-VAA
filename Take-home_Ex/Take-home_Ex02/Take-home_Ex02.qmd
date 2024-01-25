@@ -1,0 +1,17 @@
+---
+title: "Take-home Exercise 2: DataViz Makeover"
+author: "Chrissandro"
+date: "25 January 2024"
+date-modified: "last-modified"
+execute:
+  eval: true
+  echo: true
+  warning: false
+editor: visual
+---
+
+# 1. Overview
+
+In this take-home exercise, my goal is to apply what I have learned through the first two weeks of my Visual Analytics & Applications class such as different design practices and principles of DataViz and try to improve upon a fellow classmate's data visualization in their Take-home Exercise 1 in both aesthetic and clarity.
+
+# 2. 
