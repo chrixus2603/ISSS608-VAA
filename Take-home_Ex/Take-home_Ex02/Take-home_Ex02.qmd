@@ -142,8 +142,7 @@ The data is now ready to be utilized.
 # 3.1 Distribution of students' performance
 
 ```{r}
-#| code-fold: true
-#| code-summary: Show code
+#| echo: false
 p1 <- ggplot(data = stu_data,
        aes(y = math)) +
   geom_violin(aes(x=0)) +
@@ -187,9 +186,127 @@ p3 <- ggplot(data = stu_data,
 p1|p2|p3
 ```
 
+The original plots above are generated to illustrate the distribution of student's performance in each subject. The combination of boxplots and violin plots can tell many things, but the design of the plots above can be further improved, and here is my iteration of an improved design of the plot above:
+
+-   The y-axis labels in the middle and right plots are redundant as the three subjects have the same grading standardization. The redundant y-axis labels can therefore be removed.
+
+-   The width of the box plots cover some parts of the violin plots, obscuring some information regarding the specific blocked area. The width of the box plots can be reduced to prevent the overlapping from happening. An alternative can also be providing transparency to show both plots without them blocking each other.
+
+-   An annotation of the mean value would provide more details in addition to the red dot in each boxplot.
+
+-   The color of the grid lines is a tad too light, almost converging with the white background. Providing a slightly darker color will provide better visual contrast.
+
+-   There are missing labels such as the plot title and y-axes title. These elements can help viewers to understand the purpose of the graph more.
+
+-   Each plot representing different subjects can be assigned different color to show better separation and comparison.
+
+-   The whisker lines of the box plots are barely visible, which can be fixed by increasing their length.
+
+-   Some more axis lines can be added to increase clarity and ease in data pinpointing.
+
+```{r}
+#| code-fold: true
+#| code-summary: Show code
+
+math_mean <- mean(stu_data$math)
+scie_mean <- mean(stu_data$science)
+read_mean <- mean(stu_data$read)
+
+p1 <- ggplot(data = stu_data,
+       aes(y = math)) +
+  geom_violin(aes(x=0),
+              fill=NA,
+              color="orange") +
+  geom_boxplot(width=0.4,
+               color="orange")+
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  stat_summary(aes(x = 0),
+               geom = "point",       
+               fun.y = "mean",         
+               colour = "red", 
+               size = 2) +
+  annotate(
+    geom = "text", 
+    x = 0.26, 
+    y = 230,
+    size = 3.2,
+    label = paste("Mean = ", round(math_mean, 2)),
+    color = "red"
+  ) +
+  scale_y_continuous(NULL, breaks = seq(0, 1000, 100), limits = c(0, 1000)) +
+  scale_x_continuous("Mathematics", breaks = NULL) +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.major.x = element_blank())
+
+p2 <- ggplot(data = stu_data,
+       aes(y = science)) +
+  geom_violin(aes(x=0),
+              fill=NA,
+              color="green3") +
+  geom_boxplot(width=0.4,
+               color="green3")+
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  stat_summary(aes(x = 0),
+               geom = "point",       
+               fun.y = "mean",         
+               colour = "red", 
+               size = 2) +
+  annotate(
+    geom = "text", 
+    x = 0.26, 
+    y = 230,
+    size = 3.2,
+    label = paste("Mean = ", round(scie_mean, 2)),
+    color = "red"
+  ) +
+  scale_y_continuous(NULL, breaks = seq(0, 1000, 100), limits = c(0, 1000)) +
+  scale_x_continuous("Science", breaks = NULL) +
+    theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.major.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+
+p3 <- ggplot(data = stu_data,
+       aes(y = read)) +
+  geom_violin(aes(x=0),
+              fill=NA,
+              color="blue") +
+  geom_boxplot(width=0.4,
+               color="blue") +
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  stat_summary(aes(x = 0),
+               geom = "point",       
+               fun.y = "mean",         
+               colour = "red", 
+               size = 2) +
+  annotate(
+    geom = "text", 
+    x = 0.26, 
+    y = 230,
+    size = 3.2,
+    label = paste("Mean = ", round(read_mean, 2)),
+    color = "red"
+  ) +
+  scale_y_continuous(NULL, breaks = seq(0, 1000, 100), limits = c(0, 1000)) +
+  scale_x_continuous("Reading", breaks = NULL) +
+    theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.major.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+
+p1+p2+p3 +
+  plot_annotation(
+  title = 'Student\'s Performance Across Different Subjects',
+  theme = theme(plot.title = element_text(hjust = 0.5))
+)
+```
+
 # 3.2 Visualizing student performance in relation to gender
 
-:::panel-tabset
+::: panel-tabset
 ## Mathematics
 
 ```{r}
@@ -323,113 +440,341 @@ ggplot(data = stu_data,
 ```
 :::
 
-# 3.3 Visualizing student performance in relation to their enrolled school
+The histogram plots are used to show the distribution of student's performance in three different subjects in regards to their gender. To show the comparison between both genders, *facet_wrap()* function is used. One issue I have is that even though the plot is trying to visualize data comparison between two genders and also between three subjects, using a tabset panel doesn't really achieve the goal of providing ease of comparison between all subjects. I am proposing to use another type of plot to achieve fully the purpose of this section of data visualization.
 
-```{r}
-average_math_SG <- mean(stu_data$math)
-average_scie_SG <- mean(stu_data$science)
-average_read_SG <- mean(stu_data$read)
+Before that, here are my iterations of improvement that can be applied to these plots:
 
-stu_qqq_sch <- stu_data %>%
-  group_by(school_ID) %>%
-  mutate(average_math_diff = abs(mean(math)-average_math_SG),
-         average_science_diff = abs(mean(science)-average_scie_SG),
-         average_read_diff = abs(mean(read)-average_read_SG)) %>%
-  select(school_ID, average_math_diff, average_science_diff, average_read_diff) %>%
-  unique() 
-```
+-   Labels can be fixed and cleaned.
 
-```{r}
-#| code-fold: true
-#| code-summary: Show code
-p1 <- ggplot(data = stu_qqq_sch,
-       aes(y = average_math_diff)) +
-  geom_boxplot(width = 0.1) +
-  stat_boxplot(geom = "errorbar", width = 0.05) +
-  stat_summary(aes(x = 0),
-               geom = "point",       
-               fun.y = "mean",         
-               colour = "red", 
-               size = 1) +
-  scale_y_continuous(NULL, limits = c(0,220)) +
-  scale_x_continuous("math avg grade diff", breaks = NULL) +
-  theme_minimal()
+-   Grid lines can be a bit darker to increase visual clarity.
 
-p2 <- ggplot(data = stu_qqq_sch,
-       aes(y = average_science_diff)) +
-  geom_boxplot(width = 0.1) +
-  stat_boxplot(geom = "errorbar", width = 0.05) +
-  stat_summary(aes(x = 0),
-               geom = "point",       
-               fun.y ="mean",         
-               colour ="red", 
-               size=1) +
-  scale_y_continuous(NULL, limits = c(0,220)) +
-  scale_x_continuous("science avg grade diff", breaks = NULL) +
-  theme_minimal()
+-   Include stat bins and annotations to show exact value of mean, medians, and count of each histogram bin.
 
-p3 <- ggplot(data = stu_qqq_sch,
-       aes(y = average_read_diff)) +
-  geom_boxplot(width = 0.1) +
-  stat_boxplot(geom = "errorbar", width = 0.05) +
-  stat_summary(aes(x = 0),
-               geom = "point",       
-               fun.y ="mean",         
-               colour ="red", 
-               size=1) +
-  scale_y_continuous(NULL, limits = c(0,220)) +
-  scale_x_continuous("reading avg grade diff", breaks = NULL) +
-  theme_minimal()
+-   Change line type to 'dashed' to improve clarity.
 
-p1|p2|p3
-```
-
-# 3.4 Visualizing student performance in relation to socioeconomic status
+::: panel-tabset
+## Mathematics
 
 ```{r}
 #| code-fold: true
 #| code-summary: Show code
+stats <- data.frame(gender = as.factor(c('Female','Male')),
+                    mean = c(mean(stu_data$math[stu_data$gender == "Female"]),
+                             mean(stu_data$math[stu_data$gender == "Male"])),
+                    median = c(median(stu_data$math[stu_data$gender == "Female"]),
+                               median(stu_data$math[stu_data$gender == "Male"])) )
+
+female_math_mean <- mean(stu_data$math[stu_data$gender == "Female"])
+male_math_mean <- mean(stu_data$math[stu_data$gender == "Male"])
+female_math_median <- median(stu_data$math[stu_data$gender == "Female"])
+male_math_median <- median(stu_data$math[stu_data$gender == "Male"])
+
+mean_annotation <- data.frame(
+  gender = c("Female", "Male"),
+  x = c(300, 300), 
+  y = c(mean(stu_data$math[stu_data$gender == "Female"]) - 20,
+        mean(stu_data$math[stu_data$gender == "Male"]) - 20),
+  label = c(paste0("Mean = ", round(female_math_mean, 2)), paste0("Mean = ", round(male_math_mean, 2)))
+)
+
+median_annotation <- data.frame(
+  gender = c("Female", "Male"),
+  x = c(300, 300), 
+  y = c(median(stu_data$math[stu_data$gender == "Female"]) + 20,
+        median(stu_data$math[stu_data$gender == "Male"]) + 20),
+  label = c(paste0("Median = ", round(female_math_median, 2)), paste0("Median = ", round(male_math_median, 2)))
+)
+
 ggplot(data = stu_data,
-       aes(y = escs)) +
-  geom_violin(aes(x = 0))+
-  geom_boxplot()+
-  stat_summary(geom = 'point',
-               fun = 'mean',
-               aes(x = 0),
-               color = 'red') +
-  scale_y_continuous(NULL) +
-  scale_x_continuous('Social Economic Standing', breaks = NULL) +
-  theme_minimal()
+       aes(y = math)) +
+  geom_histogram(binwidth = 50,
+                 color = 'grey50',
+                 fill = 'grey90') +
+  stat_bin(binwidth = 50,
+           geom = "text",
+           aes(label=after_stat(count)), 
+           vjust = .35,
+           hjust = .75,
+           size = 2.8,
+           color = 'black') +
+  facet_wrap(~ gender) +
+  geom_text(data = mean_annotation,
+            aes(x=x,
+                y=y,
+                label=label),
+            size=3,
+            color="red") +
+    geom_text(data = median_annotation,
+            aes(x=x,
+                y=y,
+                label=label),
+            size=3,
+            color="blue") +
+  geom_hline(data = stats,
+             mapping = aes(yintercept=mean),
+             color = "red",
+             linetype = 'dashed') +
+  geom_hline(data = stats,
+             mapping = aes(yintercept=median),
+             color = "blue",
+             linetype = 'dashed') +
+  labs(title="", x = "Count", y = "Score") +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_line(color = "grey80"),
+        panel.grid.major.x = element_blank()) +
+  plot_annotation(
+  title = 'Student\'s Grade Distribution between Genders in Mathematics',
+  theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
+
+## Science
 
 ```{r}
 #| code-fold: true
 #| code-summary: Show code
-cor1 <- round(cor(stu_data$math, stu_data$escs),2)
-cor2 <- round(cor(stu_data$science, stu_data$escs),2)
-cor3 <- round(cor(stu_data$read, stu_data$escs),2)
+stats <- data.frame(gender = as.factor(c('Female','Male')),
+                    mean = c(mean(stu_data$science[stu_data$gender == "Female"]),
+                             mean(stu_data$science[stu_data$gender == "Male"])),
+                    median = c(median(stu_data$science[stu_data$gender == "Female"]),
+                               median(stu_data$science[stu_data$gender == "Male"])) )
 
-p1 <- ggplot(data = stu_data,
-             aes(y = math, x = escs)) +
-        geom_point(size = 0.1)+
-        geom_smooth(method = lm) + 
-        annotate("text", x = 2.5, y = 600, label=paste0("r = ", cor1), color = 'blue') +
-        theme_minimal()
+female_scie_mean <- mean(stu_data$science[stu_data$gender == "Female"])
+male_scie_mean <- mean(stu_data$science[stu_data$gender == "Male"])
+female_scie_median <- median(stu_data$science[stu_data$gender == "Female"])
+male_scie_median <- median(stu_data$science[stu_data$gender == "Male"])
 
-p2 <- ggplot(data = stu_data,
-             aes(y = science, x = escs)) +
-        geom_point(size = 0.1)+
-        geom_smooth(method = lm) +
-        annotate("text", x = 2.5, y = 600, label=paste0("r = ", cor2), color = 'blue') + 
-        theme_minimal()
+mean_annotation <- data.frame(
+  gender = c("Female", "Male"),
+  x = c(300, 300), 
+  y = c(mean(stu_data$science[stu_data$gender == "Female"]) - 20,
+        mean(stu_data$science[stu_data$gender == "Male"]) - 20),
+  label = c(paste0("Mean = ", round(female_scie_mean, 2)), paste0("Mean = ", round(male_scie_mean, 2)))
+)
 
-p3 <- ggplot(data = stu_data,
-             aes(y = read, x = escs)) +
-        geom_point(size = 0.1)+
-        geom_smooth(method = lm) + 
-        annotate("text", x = 2.5, y = 600, label=paste0("r = ", cor3), color = 'blue') +
-        theme_minimal()
+median_annotation <- data.frame(
+  gender = c("Female", "Male"),
+  x = c(300, 300), 
+  y = c(median(stu_data$science[stu_data$gender == "Female"]) + 20,
+        median(stu_data$science[stu_data$gender == "Male"]) + 20),
+  label = c(paste0("Median = ", round(female_scie_median, 2)), paste0("Median = ", round(male_scie_median, 2)))
+)
 
-p1/p2/p3
+ggplot(data = stu_data,
+       aes(y = science)) +
+  geom_histogram(binwidth = 50,
+                 color = 'grey50',
+                 fill = 'grey90') +
+  stat_bin(binwidth = 50,
+           geom = "text",
+           aes(label=after_stat(count)), 
+           vjust = .35,
+           hjust = .75,
+           size = 2.8,
+           color = 'black') +
+  facet_wrap(~ gender) +
+  geom_text(data = mean_annotation,
+            aes(x=x,
+                y=y,
+                label=label),
+            size=3,
+            color="red") +
+    geom_text(data = median_annotation,
+            aes(x=x,
+                y=y,
+                label=label),
+            size=3,
+            color="blue") +
+  geom_hline(data = stats,
+             mapping = aes(yintercept=mean),
+             color = "red",
+             linetype = 'dashed') +
+  geom_hline(data = stats,
+             mapping = aes(yintercept=median),
+             color = "blue",
+             linetype = 'dashed') +
+  labs(title="", x = "Count", y = "Score") +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_line(color = "grey80"),
+        panel.grid.major.x = element_blank()) +
+  plot_annotation(
+  title = 'Student\'s Grade Distribution between Genders in Science',
+  theme = theme(plot.title = element_text(hjust = 0.5)))
 ```
 
+## Reading
+
+```{r}
+#| code-fold: true
+#| code-summary: Show code
+stats <- data.frame(gender = as.factor(c('Female','Male')),
+                    mean = c(mean(stu_data$read[stu_data$gender == "Female"]),
+                             mean(stu_data$read[stu_data$gender == "Male"])),
+                    median = c(median(stu_data$read[stu_data$gender == "Female"]),
+                               median(stu_data$read[stu_data$gender == "Male"])) )
+
+female_read_mean <- mean(stu_data$read[stu_data$gender == "Female"])
+male_read_mean <- mean(stu_data$read[stu_data$gender == "Male"])
+female_read_median <- median(stu_data$read[stu_data$gender == "Female"])
+male_read_median <- median(stu_data$read[stu_data$gender == "Male"])
+
+mean_annotation <- data.frame(
+  gender = c("Female", "Male"),
+  x = c(300, 300), 
+  y = c(mean(stu_data$read[stu_data$gender == "Female"]) - 20,
+        mean(stu_data$read[stu_data$gender == "Male"]) - 20),
+  label = c(paste0("Mean = ", round(female_read_mean, 2)), paste0("Mean = ", round(male_read_mean, 2)))
+)
+
+median_annotation <- data.frame(
+  gender = c("Female", "Male"),
+  x = c(300, 300), 
+  y = c(median(stu_data$read[stu_data$gender == "Female"]) + 20,
+        median(stu_data$read[stu_data$gender == "Male"]) + 20),
+  label = c(paste0("Median = ", round(female_read_median, 2)), paste0("Median = ", round(male_read_median, 2)))
+)
+
+ggplot(data = stu_data,
+       aes(y = read)) +
+  geom_histogram(binwidth = 50,
+                 color = 'grey50',
+                 fill = 'grey90') +
+  stat_bin(binwidth = 50,
+           geom = "text",
+           aes(label=after_stat(count)), 
+           vjust = .35,
+           hjust = .75,
+           size = 2.8,
+           color = 'black') +
+  facet_wrap(~ gender) +
+  geom_text(data = mean_annotation,
+            aes(x=x,
+                y=y,
+                label=label),
+            size=3,
+            color="red") +
+    geom_text(data = median_annotation,
+            aes(x=x,
+                y=y,
+                label=label),
+            size=3,
+            color="blue") +
+  geom_hline(data = stats,
+             mapping = aes(yintercept=mean),
+             color = "red",
+             linetype = 'dashed') +
+  geom_hline(data = stats,
+             mapping = aes(yintercept=median),
+             color = "blue",
+             linetype = 'dashed') +
+  labs(title="", x = "Count", y = "Score") +
+  theme(panel.background = element_rect(fill="white",colour="white"),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_line(color = "grey80"),
+        panel.grid.major.x = element_blank()) +
+  plot_annotation(
+  title = 'Student\'s Grade Distribution between Genders in Reading',
+  theme = theme(plot.title = element_text(hjust = 0.5)))
+```
+:::
+
+In order to better visualize the whole comparison, I propose to use box plots as it provides a better way to show distribution between multiple categories and simplify the process of visualizing the data by using the *patchwork* function to combine all box plots. The sketch I created below show the process of how the plots can be realized.
+
+**Sketch:**
+
+![](images/WhatsApp%20Image%202024-01-28%20at%2016.55.38.jpeg)
+
+The addition of violin plot is to help show the density curve of the distribution because box plot alone couldn't show where the bulk of the data points are. Then, the code chunk below generates the finalized plot using the loaded R packages.
+
+```{r}
+gendermath <- ggplot(data = stu_data,
+       aes(x = gender,
+           y = math)) +
+  geom_boxplot(color = c("salmon4",'cyan4'),
+               fill = c("salmon1",'lightblue2'),
+               width=0.35) +
+  stat_boxplot(geom = "errorbar", 
+               width = 0.3,
+               color = c("salmon1",'cyan3')) +
+  geom_violin(fill="NA",
+              color="grey75") +
+  geom_point(stat="summary",        
+             fun.y="mean",           
+             colour ="darkgreen",          
+             size=2) +
+  ylim(100,900) +
+    labs(x="",
+         title="Mathematics") +
+  scale_y_continuous("Score", breaks = seq(100,900,100), limits = c(100,900)) +
+    theme(plot.title = element_text(hjust = 0.5, vjust = -2),
+          panel.background = element_rect(fill="white",colour="white"),
+          panel.grid.major = element_line(color = "grey80"),
+          panel.grid.minor = element_blank(),
+          panel.grid.major.x = element_blank())
+
+genderscie <- ggplot(data = stu_data,
+       aes(x = gender,
+           y = science)) +
+  geom_boxplot(color = c("salmon4",'cyan4'),
+               fill = c("salmon1",'lightblue2'),
+               width=0.35) +
+  stat_boxplot(geom = "errorbar", 
+               width = 0.3,
+               color = c("salmon1",'cyan3')) +
+  geom_violin(fill="NA",
+              color="grey75") +
+  geom_point(stat="summary",        
+             fun.y="mean",           
+             colour ="darkgreen",          
+             size=2) +
+  ylim(100,900) +
+  labs(x="Gender", title="Science") +
+  scale_y_continuous(NULL, breaks = seq(100,900,100), limits = c(100,900)) +
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(hjust = 0.5, vjust = -2),
+        panel.background = element_rect(fill="white",colour="white"),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank())
+
+genderread <- ggplot(data = stu_data,
+       aes(x = gender,
+           y = read)) +
+ geom_boxplot(color = c("salmon4",'cyan4'),
+               fill = c("salmon1",'lightblue2'),
+               width=0.35) +
+  stat_boxplot(geom = "errorbar", 
+               width = 0.3,
+               color = c("salmon1",'cyan3')) +
+  geom_violin(fill="NA",
+              color="grey75") +
+  geom_point(stat="summary",        
+             fun.y="mean",           
+             colour ="darkgreen",          
+             size=2) +
+  ylim(100,900) +
+  labs(x="", title = "Reading") +
+  scale_y_continuous(NULL, breaks = seq(100,900,100), limits = c(100,900)) +
+  theme(axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        plot.title = element_text(hjust = 0.5, vjust = -2),
+        panel.background = element_rect(fill="white",colour="white"),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_line(color = "grey80"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank())
+
+gendermath + genderscie + genderread +
+  plot_annotation(
+  title = 'Student\'s Grade Distribution between Genders in Three Subjects',
+  theme = theme(plot.title = element_text(hjust = 0.5)))
+```
+
+As can be seen, the combination of **patchwork and box plot + violin plot enables a comparison of multiple categories and subcategories of data in one single plot, providing quick insight to how the data is distributed**. The **density curve** provided by the violin plot such as the width of the violin at each level indicates the density or number of data points at that level. This allows viewers to see where data are concentrated and identify any modes (peaks) in the data.
+
+# 3.3 Conclusion and Key Takeaways
+
+This exercise allows me to increase my knowledge on how to efficiently tackle certain data in regards to how to best visualize it in order to make it easily understandable. It also allows me to experiment with more tools that ggplot2 offers in customizing and improving the plot design to better enhance their aesthetics and clarity. And lastly, being able to observe a classmate's work also helped me in bettering myself in terms of how to code the plots more efficiently and learn new things.
