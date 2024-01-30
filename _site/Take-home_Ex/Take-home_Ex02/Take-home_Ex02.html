@@ -141,6 +141,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex03/Hands-on_Ex03b.html" rel="" target="">
  <span class="dropdown-text">Hands-on Exercise 3b: Programming Animated Statistical Graphics with R</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04a.html" rel="" target="">
+ <span class="dropdown-text">Hands-on Exercise 4a: Visualising Distribution</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item dropdown ">
@@ -919,7 +923,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>In order to better visualize the whole comparison, I propose to use box plots as it provides a better way to show distribution between multiple categories and simplify the process of visualizing the data by using the <em>patchwork</em> function to combine all box plots. The sketch I created below show the process of how the plots can be realized.</p>
 <p><strong>Sketch:</strong></p>
 <p><img src="images/WhatsApp Image 2024-01-28 at 16.55.38.jpeg" class="img-fluid"></p>
-<p>The addition of violin plot is to help show the density curve of the distribution because box plot alone couldn’t show where the bulk of the data points are. Then, below is the finalized plot using the loaded R packages.</p>
+<p>The addition of violin plot is to help show the density curve of the distribution because box plot alone couldn’t show where the bulk of the data points are. Then, the code chunk below generates the finalized plot using the loaded R packages.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>gendermath <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> stu_data,</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> gender,</span>
