@@ -26,6 +26,10 @@ website:
           href: "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04a.html"
         - text: "Hands-on Exercise 4b: Visual Statistical Analysis"
           href: "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04b.html"
+        - text: "Hands-on Exercise 4c: Visualising Uncertainty"
+          href: "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04c.html"
+        - text: "Hands-on Exercise 4d: Funnel Plots for Fair Comparisons"
+          href: "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04d.html"
     - text: "In-class Exercises"
       menu:
         - text: "In-class Exercise 1"
