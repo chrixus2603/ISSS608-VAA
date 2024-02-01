@@ -247,8 +247,10 @@ exam %>%
 exam %>%
   ggplot(aes(x = RACE, 
              y = MATHS)) +
-  stat_pointinterval(
-    show.legend = FALSE) +   
+  stat_pointinterval(.width = c(0.95, 0.99),
+                     .point = median,
+                     .interval = qi,
+                     show.legend = FALSE) +   
   labs(
     title = "Visualising confidence intervals of mean math score",
     subtitle = "Mean Point + Multiple-interval plot")
