@@ -1,0 +1,54 @@
+---
+title: "Take-home Exercise 3: Be Weatherwise or Otherwise"
+author: "Chrissandro"
+date: "15 February 2024"
+date-modified: "last-modified"
+execute:
+  eval: true
+  echo: true
+  warning: false
+editor: visual
+---
+
+# 1. Overview
+
+In this take-home exercise, my goal is to apply my newly acquired knowledge of visual interactivity and visualizing uncertainty methods to create an analytics-driven data visualisation and enhancing user experience in data discovery and visual storytelling utilizing appropriate interactive techniques.
+
+# 2. Data Preparation
+
+## 2.1 Installing R packages
+
+In this take-home exercise, these R packages will be used:
+
+-   [tidyverse](https://www.tidyverse.org/)
+
+The code chunk used is as follows:
+
+```{r}
+pacman::p_load(tidyverse, )
+```
+
+## 2.2 Importing Temperature Data
+
+The datasets of historical daily temperature data in Singapore (Changi) from multiple years are taken from Meteorological Service Singapore website. We will be looking from the years 1983, 1993, 2003, 2013, and 2023.
+
+```{r}         
+temp1 <- read_csv("data/DAILYDATA_S24_202306.csv")
+```
+
+```{r}        
+temp2 <- read_csv("data/DAILYDATA_S24_201306.csv")
+```
+
+```{r}         
+temp3 < -read_csv("data/DAILYDATA_S24_200306.csv")
+```
+
+```{r}         
+temp4 <- read_csv("data/DAILYDATA_S24_199306.csv")
+```
+
+```{r}         
+temp5 <- read_csv("data/DAILYDATA_S24_198306.csv")
+```
+
