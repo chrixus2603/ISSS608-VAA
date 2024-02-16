@@ -25,7 +25,9 @@ In this take-home exercise, these R packages will be used:
 The code chunk used is as follows:
 
 ```{r}
-pacman::p_load(tidyverse, )
+pacman::p_load(tidyverse, haven, ggiraph,
+               ggthemes, ggdist, plotly, DT,
+               crosstalk)
 ```
 
 ## 2.2 Importing Temperature Data
@@ -34,21 +36,120 @@ The datasets of historical daily temperature data in Singapore (Changi) from mul
 
 ```{r}         
 temp1 <- read_csv("data/DAILYDATA_S24_202306.csv")
-```
-
-```{r}        
 temp2 <- read_csv("data/DAILYDATA_S24_201306.csv")
-```
-
-```{r}         
-temp3 < -read_csv("data/DAILYDATA_S24_200306.csv")
-```
-
-```{r}         
+temp3 <- read_csv("data/DAILYDATA_S24_200306.csv")
 temp4 <- read_csv("data/DAILYDATA_S24_199306.csv")
+temp5 <- read_csv("data/DAILYDATA_S24_198306.csv")
+
+temp <- rbind(temp1, temp2, temp3, temp4, temp5)
+temp$Year <- as.factor(temp$Year)
+temp$Day <- as.factor(temp$Day)
 ```
 
-```{r}         
-temp5 <- read_csv("data/DAILYDATA_S24_198306.csv")
+```{r}
+avg_temp <- temp %>% 
+  group_by(Year) %>%
+  summarise(avgvalue = mean(`Mean Temperature (°C)`))
+```
+
+```{r}
+ggplotly(
+ggplot() + 
+  geom_line(data=temp,
+            aes(x=Day, 
+                y=`Mean Temperature (°C)`, 
+                group=Year), 
+            colour="black") +
+  geom_hline(aes(yintercept = avgvalue), 
+             data= avg_temp, 
+             linetype= 5, 
+             colour="red", 
+             size=0.5) +
+  facet_grid(~Year) +
+  labs(axis.text.x = element_blank(),
+       title = "Daily Mean Temperature in Changi during June") +
+  xlab("Day") +
+  ylab("Mean Temperature (°C)") +
+  theme_tufte(base_family = "Helvetica")
+)
+```
+```{r}
+ggplotly(
+ggplot(temp, 
+       aes(Day, 
+           Year, 
+           fill = `Mean Temperature (°C)`)) + 
+geom_tile(color = "white", 
+          size = 0.1) + 
+theme_tufte(base_family = "Helvetica") +
+scale_fill_gradient(name = "°C",
+                    low = "yellow", 
+                    high = "orange2") +
+labs(x = NULL, 
+     y = NULL, 
+     title = "Daily Mean Temperature in Changi for June") +
+theme(axis.ticks = element_blank(),
+      plot.title = element_text(hjust = 0.5),
+      legend.title = element_text(size = 8),
+      legend.text = element_text(size = 6) )
+)
+```
+
+```{r}
+year_temp <- temp %>%
+  group_by(Year) %>%
+  summarise(
+    n=n(),
+    mean=mean(`Mean Temperature (°C)`),
+    sd=sd(`Mean Temperature (°C)`)
+    ) %>%
+  mutate(se=sd/sqrt(n-1))
+```
+
+```{r}
+#shared_df = SharedData$new(year_temp)
+shared_df = year_temp[, c("Year", "mean", "sd", "se")]
+
+bscols(widths = c(6,6),
+       ggplotly((ggplot(shared_df) +
+                   geom_errorbar(aes(
+                     x=Year,
+                     ymin=mean-2.58*se, 
+                     ymax=mean+2.58*se), 
+                     width=0.2, 
+                     colour="black", 
+                     alpha=0.9, 
+                     size=0.5) +
+                   geom_point(aes(
+                     x=Year, 
+                     y=mean, 
+                     text = paste("Year:", `Year`,
+                                  "<br>Avg. Mean Temp:", round(mean, digits = 2),
+                                  "<br>95% CI:[", 
+                                  round((mean-2.58*se), digits = 2), ",",
+                                  round((mean+2.58*se), digits = 2),"]")),
+                     stat="identity", 
+                     color="red", 
+                     size = 1.5, 
+                     alpha=1) + 
+                   xlab("Year") + 
+                   ylab("Average Daily Mean Temp") + 
+                   theme_minimal() + 
+                   theme(axis.text.x = element_text(
+                     angle = 45, vjust = 0.5, hjust=1)) +
+                   ggtitle("99% Confidence interval of average /<br>daily mean temp by year")), 
+                tooltip = "text"), 
+       DT::datatable(shared_df, 
+                     rownames = FALSE, 
+                     class="compact", 
+                     width="100%", 
+                     options = list(pageLength = 10,
+                                    scrollX=T), 
+                     colnames = c("Year", 
+                                  "Avg Mean Daily Temp",
+                                  "Std Dev",
+                                  "Std Error")) %>%
+         formatRound(columns=c('mean', 'sd', 'se'),
+                     digits=2))
 ```
 

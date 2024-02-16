@@ -1454,5 +1454,26 @@
     "title": "In-class Exercise 1: Now You See It!",
     "section": "Importing PISA data",
     "text": "Importing PISA data\nThe code chunk below uses read_sas() of haven to import PISA data into R environment.\n\nstu_qqq &lt;- read_sas(\"data/cy08msp_stu_qqq.sas7bdat\")\n\n\nstu_qqq_SG &lt;- stu_qqq %&gt;%\n  filter(CNT == \"SGP\")\n\n\nwrite_rds(stu_qqq_SG,\n          \"data/stu_qqq_SG.rds\")\n\n\nstu_qqq_SG &lt;-\n  read_rds(\"data/stu_qqq_SG.rds\")"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex03/Take-home_Ex03.html",
+    "href": "Take-home_Ex/Take-home_Ex03/Take-home_Ex03.html",
+    "title": "Take-home Exercise 3: Be Weatherwise or Otherwise",
+    "section": "",
+    "text": "In this take-home exercise, my goal is to apply my newly acquired knowledge of visual interactivity and visualizing uncertainty methods to create an analytics-driven data visualisation and enhancing user experience in data discovery and visual storytelling utilizing appropriate interactive techniques."
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex03/Take-home_Ex03.html#installing-r-packages",
+    "href": "Take-home_Ex/Take-home_Ex03/Take-home_Ex03.html#installing-r-packages",
+    "title": "Take-home Exercise 3: Be Weatherwise or Otherwise",
+    "section": "2.1 Installing R packages",
+    "text": "2.1 Installing R packages\nIn this take-home exercise, these R packages will be used:\n\ntidyverse\n\nThe code chunk used is as follows:\n\npacman::p_load(tidyverse, haven, ggiraph,\n               ggthemes, ggdist, plotly, DT)"
+  },
+  {
+    "objectID": "Take-home_Ex/Take-home_Ex03/Take-home_Ex03.html#importing-temperature-data",
+    "href": "Take-home_Ex/Take-home_Ex03/Take-home_Ex03.html#importing-temperature-data",
+    "title": "Take-home Exercise 3: Be Weatherwise or Otherwise",
+    "section": "2.2 Importing Temperature Data",
+    "text": "2.2 Importing Temperature Data\nThe datasets of historical daily temperature data in Singapore (Changi) from multiple years are taken from Meteorological Service Singapore website. We will be looking from the years 1983, 1993, 2003, 2013, and 2023.\n\ntemp1 &lt;- read_csv(\"data/DAILYDATA_S24_202306.csv\")\ntemp2 &lt;- read_csv(\"data/DAILYDATA_S24_201306.csv\")\ntemp3 &lt;- read_csv(\"data/DAILYDATA_S24_200306.csv\")\ntemp4 &lt;- read_csv(\"data/DAILYDATA_S24_199306.csv\")\ntemp5 &lt;- read_csv(\"data/DAILYDATA_S24_198306.csv\")\n\ntemp &lt;- rbind(temp1, temp2, temp3, temp4, temp5)\ntemp$Year &lt;- as.factor(temp$Year)\ntemp$Day &lt;- as.factor(temp$Day)\n\n\navg_temp &lt;- temp %&gt;% \n  group_by(Year) %&gt;%\n  summarise(avgvalue = mean(`Mean Temperature (°C)`))\n\n\nggplotly(\nggplot() + \n  geom_line(data=temp,\n            aes(x=Day, \n                y=`Mean Temperature (°C)`, \n                group=Year), \n            colour=\"black\") +\n  geom_hline(aes(yintercept = avgvalue), \n             data= avg_temp, \n             linetype= 5, \n             colour=\"red\", \n             size=0.5) +\n  facet_grid(~Year) +\n  labs(axis.text.x = element_blank(),\n       title = \"Daily Mean Temperature in Changi during June\") +\n  xlab(\"Day\") +\n  ylab(\"Mean Temperature (°C)\") +\n  theme_tufte(base_family = \"Helvetica\")\n)\n\n\n\n\n\n\nggplotly(\nggplot(temp, \n       aes(Day, \n           Year, \n           fill = `Mean Temperature (°C)`)) + \ngeom_tile(color = \"white\", \n          size = 0.1) + \ntheme_tufte(base_family = \"Helvetica\") +\nscale_fill_gradient(name = \"°C\",\n                    low = \"yellow\", \n                    high = \"orange2\") +\nlabs(x = NULL, \n     y = NULL, \n     title = \"Daily Mean Temperature in Changi for June\") +\ntheme(axis.ticks = element_blank(),\n      plot.title = element_text(hjust = 0.5),\n      legend.title = element_text(size = 8),\n      legend.text = element_text(size = 6) )\n)"
   }
 ]
