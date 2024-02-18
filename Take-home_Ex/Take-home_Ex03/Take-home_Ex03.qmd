@@ -14,50 +14,64 @@ editor: visual
 
 In this take-home exercise, my goal is to apply my newly acquired knowledge of visual interactivity and visualizing uncertainty methods to create an analytics-driven data visualisation and enhancing user experience in data discovery and visual storytelling utilizing appropriate interactive techniques.
 
+![](images/Climate_change.jpg)
+
+The claims regarding the daily temperature section made above can be validated through this exercise through data visualization techniques and uncertainty methods.
+
 # 2. Data Preparation
 
 ## 2.1 Installing R packages
 
-In this take-home exercise, these R packages will be used:
-
--   [tidyverse](https://www.tidyverse.org/)
-
-The code chunk used is as follows:
+In this take-home exercise, these R packages will be loaded using *pacman::p_load()* function and the code chunk used is as follows:
 
 ```{r}
-pacman::p_load(tidyverse, haven, ggiraph,
-               ggthemes, ggdist, plotly, DT,
+pacman::p_load(tidyverse, haven, ggthemes,
+               ggdist, plotly, DT,
                crosstalk)
 ```
 
 ## 2.2 Importing Temperature Data
 
-The datasets of historical daily temperature data in Singapore (Changi) from multiple years are taken from Meteorological Service Singapore website. We will be looking from the years 1983, 1993, 2003, 2013, and 2023.
+The datasets of historical daily temperature data of the month June in Singapore (Changi) from multiple years are taken from Meteorological Service Singapore website. We will be looking from the years 1983, 1993, 2003, 2013, and 2023. As the 'Year' column is in numerical value, the *as.factor()* function will be used to factorize the variable as the Year value is treated as categorical in this exercise.
 
-```{r}         
+```{r}
 temp1 <- read_csv("data/DAILYDATA_S24_202306.csv")
 temp2 <- read_csv("data/DAILYDATA_S24_201306.csv")
 temp3 <- read_csv("data/DAILYDATA_S24_200306.csv")
 temp4 <- read_csv("data/DAILYDATA_S24_199306.csv")
 temp5 <- read_csv("data/DAILYDATA_S24_198306.csv")
 
-temp <- rbind(temp1, temp2, temp3, temp4, temp5)
+temp <- rbind(temp1, temp2, temp3, temp4, temp5) %>%
+  mutate (mean_temp = `Mean Temperature (°C)`) %>%
+  select(Year, Day, mean_temp)
 temp$Year <- as.factor(temp$Year)
-temp$Day <- as.factor(temp$Day)
 ```
 
+# 3. Visualizing Data
+
+Our dataset spans over five years, from 1983 to 2023, presenting a time-series analysis opportunity. This allows us to track trends, essentially the overall direction in which the data points are heading over time. Moreover, it's crucial to examine the variability within this dataset, which sheds light on the fluctuations or the extent of change between consecutive points across a specific period.
+
+For this project, I'm opting for visualization techniques that best represent time-series data:
+
+-   **Calendar Heatmaps**: These lay out the time-series data across a standard calendar layout, making it straightforward to spot daily or monthly patterns at a glance.
+
+-   **Cycle Plots**: Cycle plots are particularly adept at illustrating seasonal or cyclical patterns within time-series data. They allow us to dissect the dataset by segments (like days or months) across different years, highlighting recurring trends or deviations that might not be apparent in other forms of visualization.
+
+## 3.1 Cycle Plot
+
 ```{r}
+#| code-fold: true
+#| code-summary: Show code
+
 avg_temp <- temp %>% 
   group_by(Year) %>%
-  summarise(avgvalue = mean(`Mean Temperature (°C)`))
-```
+  summarise(avgvalue = mean(mean_temp))
 
-```{r}
 ggplotly(
 ggplot() + 
   geom_line(data=temp,
             aes(x=Day, 
-                y=`Mean Temperature (°C)`, 
+                y=mean_temp, 
                 group=Year), 
             colour="black") +
   geom_hline(aes(yintercept = avgvalue), 
@@ -66,24 +80,59 @@ ggplot() +
              colour="red", 
              size=0.5) +
   facet_grid(~Year) +
-  labs(axis.text.x = element_blank(),
+  labs(axis.text.x = element_text(
+                     angle = 45, vjust = 0.5, hjust=1),
        title = "Daily Mean Temperature in Changi during June") +
+    scale_x_continuous(NULL, breaks = seq(0, 30, 5), limits = c(0, 30)) +
   xlab("Day") +
   ylab("Mean Temperature (°C)") +
-  theme_tufte(base_family = "Helvetica")
+  theme_minimal()
 )
 ```
+
+The plot above shows the daily mean temperatures of the Changi region in the month of June across multiple years, with each of the years representing a facet to provide a clear comparison of the trends. The red horizontal line indicates the average daily mean temperature of each year.
+
+Using the *ggplotly* function, the plot is equipped with interactivity features that provide a better and detailed look of each datapoints.
+
+::: callout-tip
+## Interactive Visualization
+
+-   Hover and Tooltip: A tooltip showing detailed information of specific data points can be shown with a simple mouse hover.
+
+-   Zooming and Panning: Zooming a certain part of region of the plot is made possible to closely examine the data of that specific time stamp.
+:::
+
+From the cycle plot, it is evident that the average daily mean temperature from the year 1983 onwards to the year 2023 has been showing an increase, albeit less change is seen from the year 2003 onwards. The changes seen between each decade are listed here:
+
+-   **1983-1993**: +0.16°C
+
+-   **1993-2003**: +0.5°C
+
+-   **2003-2013**: +0.02°C
+
+-   **2013-2023**: +0.04°C
+
+The annual mean temperatures for these 5 decades of dataset rose at an average rate of +0.18°C per decade, which hits close to the value claimed by the infographic above (\~0.25°C).
+
+# 3.2 Calendar Heatmap
+
+In order to show the day scale in the calendar heatmap better, the `Day` value is factorize using *as.factor()* function to make it a categorical variable.
+
 ```{r}
+#| code-fold: true
+#| code-summary: Show code
+temp$Day <- as.factor(temp$Day)
+
 ggplotly(
 ggplot(temp, 
        aes(Day, 
            Year, 
-           fill = `Mean Temperature (°C)`)) + 
+           fill = mean_temp)) + 
 geom_tile(color = "white", 
           size = 0.1) + 
 theme_tufte(base_family = "Helvetica") +
 scale_fill_gradient(name = "°C",
-                    low = "yellow", 
+                    low = "lightyellow", 
                     high = "orange2") +
 labs(x = NULL, 
      y = NULL, 
@@ -95,19 +144,28 @@ theme(axis.ticks = element_blank(),
 )
 ```
 
+This calendar heatmap plots the temperature shifts for the month of June over several decades, capturing the essence of temperature shift on a daily basis. Each tile in the chart is tied to a particular day and year, where the color indicates the mean temperature for that day in °C. **The color palette transitions from a light yellow to deep orange, illustrating a spectrum from cooler to warmer temperatures. It is noticeable that the lighter shades can be found in the early years before the shades go darker as the year goes up.**
+
+The same interactivity features are also applied here using the *ggplotly* function, providing a more detailed and comprehensive look into each tile, where a hover will show all important information such as the exact mean temperature of that certain day of the year.
+
+# 4. Visualizing Uncertainties
+
+## 4.1 Uncertainty of point estimates with interactive error bars
+
+Below is the plot of interactive error bars for the 99% confidence interval of mean daily temperatures by year.
+
 ```{r}
+#| code-fold: true
+#| code-summary: Show code
 year_temp <- temp %>%
   group_by(Year) %>%
   summarise(
     n=n(),
-    mean=mean(`Mean Temperature (°C)`),
-    sd=sd(`Mean Temperature (°C)`)
+    mean=mean(mean_temp),
+    sd=sd(mean_temp)
     ) %>%
   mutate(se=sd/sqrt(n-1))
-```
 
-```{r}
-#shared_df = SharedData$new(year_temp)
 shared_df = year_temp[, c("Year", "mean", "sd", "se")]
 
 bscols(widths = c(6,6),
@@ -153,3 +211,33 @@ bscols(widths = c(6,6),
                      digits=2))
 ```
 
+## 4.2 Visualizing uncertainty with ggdist methods
+
+Next, looking at the temperature change between these 5 years, the error bar can be plotted using confidence level of 0.65 , 0.95, and 0.99.
+
+### 4.2.1 Data Preparation
+```{r}
+temp_change <- avg_temp %>%
+  mutate(change = avgvalue - lag(avgvalue, default = avgvalue[1]))
+```
+
+### 4.2.2 Visualizing the Uncertainty
+
+```{r}
+temp_change %>%
+  ggplot(aes(x = 1, 
+             y = change)) +
+  stat_pointinterval(
+    .width = c(0.65,0.95,0.99)) +
+  labs(
+    title = "Visualising confidence intervals of monthly mean temperature",
+    subtitle = "Mean Point + Multiple-interval plot") +
+  scale_x_continuous(NULL, breaks = NULL) +
+  scale_y_continuous("°C Change", breaks = seq(-.1,0.7,0.2), limits = c(-0.5,1)) +
+  theme_minimal()
+```
+From the error bar above, it shows the temperature difference for each year ranges between 0.02°C to 0.5 °C, with the 99% confidence level stating the temperature fluctuation to be between ~0°C to ~0.5°C.
+
+# Conclusion
+
+Our analysis doesn't back the assertion that temperatures have risen by 1.4°C to 4.6°C; instead, we're 99% certain the actual shift in temperatures ranges from a slight decrease of 0.02 degrees to an increase of only 0.5°C. It is important to note, though, that our dataset spans every 10 years. Examining data from different time frames, other locations, or specific months could potentially lead to different conclusions. So, while our findings might seem to contradict broader claims of temperature increase, they highlight the importance of considering various datasets and perspectives in climate analysis.
