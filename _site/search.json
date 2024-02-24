@@ -1496,5 +1496,12 @@
     "title": "Take-home Exercise 3: Be Weatherwise or Otherwise",
     "section": "4.2 Visualizing uncertainty with ggdist methods",
     "text": "4.2 Visualizing uncertainty with ggdist methods\nNext, looking at the temperature change between these 5 years, the error bar can be plotted using confidence level of 0.65 , 0.95, and 0.99.\n\n4.2.1 Data Preparation\n\ntemp_change &lt;- avg_temp %&gt;%\n  mutate(change = avgvalue - lag(avgvalue, default = avgvalue[1]))\n\n\n\n4.2.2 Visualizing the Uncertainty\n\ntemp_change %&gt;%\n  ggplot(aes(x = 1, \n             y = change)) +\n  stat_pointinterval(\n    .width = c(0.65,0.95,0.99)) +\n  labs(\n    title = \"Visualising confidence intervals of monthly mean temperature\",\n    subtitle = \"Mean Point + Multiple-interval plot\") +\n  scale_x_continuous(NULL, breaks = NULL) +\n  scale_y_continuous(\"°C Change\", breaks = seq(-.1,0.7,0.2), limits = c(-0.5,1)) +\n  theme_minimal()\n\n\n\n\nFrom the error bar above, it shows the temperature difference for each year ranges between 0.02°C to 0.5 °C, with the 99% confidence level stating the temperature fluctuation to be between ~0°C to ~0.5°C."
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex06/In-class_Ex06.html",
+    "href": "In-class_Ex/In-class_Ex06/In-class_Ex06.html",
+    "title": "Horizon Plot",
+    "section": "",
+    "text": "pacman::p_load(ggHoriPlot, ggthemes, tidyverse)\n\n\naverp &lt;- read_csv(\"data/AVERP.csv\") %&gt;%\n  mutate(`Date` = dmy(`Date`))\n\n\naverp %&gt;% \n  filter(Date &gt;= \"2018-01-01\") %&gt;%\n  ggplot() +\n  geom_horizon(aes(x = Date, y=Values), \n               origin = \"midpoint\", \n               horizonscale = 6)+\n  facet_grid(`Consumer Items`~.) +\n    theme_few() +\n  scale_fill_hcl(palette = 'RdBu') +\n  theme(panel.spacing.y=unit(0, \"lines\"), strip.text.y = element_text(\n    size = 5, angle = 0, hjust = 0),\n    legend.position = 'none',\n    axis.text.y = element_blank(),\n    axis.text.x = element_text(size=7),\n    axis.title.y = element_blank(),\n    axis.title.x = element_blank(),\n    axis.ticks.y = element_blank(),\n    panel.border = element_blank()\n    ) +\n    scale_x_date(expand=c(0,0), date_breaks = \"3 month\", date_labels = \"%b%y\") +\n  ggtitle('Average Retail Prices of Selected Consumer Items (Jan 2018 to Dec 2022)')"
   }
 ]
