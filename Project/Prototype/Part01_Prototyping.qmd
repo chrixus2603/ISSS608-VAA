@@ -1,0 +1,127 @@
+---
+title: "Group Project Part 1: Prototyping"
+author: "Chrissandro"
+date: "6th March 2024"
+date-modified: "last-modified"
+execute:
+  warning: false
+---
+
+    ```{r}
+    pacman::p_load(sf, tmap, tidyverse, forecast, tseries, ggplot2, plotly)
+    ```
+    
+```{r}
+popdata <- read_csv("Data/Retail Sales Value 2017100.csv")
+```
+
+```{r}
+start_date <- as.Date('2000-01-01')
+popdata$DATE <- as.Date(paste0("01/", popdata$DATE), format="%d/%m/%Y")
+
+data <- popdata[popdata$DATE >= start_date, ]
+```
+
+```{r}
+# Ensure the data is sorted by date
+data <- data[order(data$DATE),]
+
+# Check the range of dates to determine start and end
+range(data$DATE)
+```
+```{r}
+sales_ts <- ts(data$VALUE, start=c(2000, 1), frequency=12)
+```
+
+```{r}
+# Plot the time series
+plot(sales_ts, xlab="Year", ylab="Retail Sales Value", main="Retail Sales Chart")
+```
+```{r}
+sales_fit <- auto.arima(sales_ts)
+
+# You can inspect the chosen model
+summary(sales_fit)
+```
+
+```{r}
+input_h <- 12
+sales_forecast <- forecast(sales_fit, h=input_h)
+
+# Plot the forecast
+plot(sales_forecast)
+```
+```{r}
+# Assuming 'sales_ts' is your time series object
+time_index <- seq_along(sales_ts)
+
+# Create a dataframe for linear regression
+data_for_lm <- data.frame(Time = time_index, Sales = as.numeric(sales_ts))
+```
+
+```{r}
+# Fit a linear regression model
+lm_model <- lm(Sales ~ Time, data=data_for_lm)
+
+# Summary of the model to see coefficients and statistics
+summary(lm_model)
+```
+```{r}
+# Plot the actual data
+plot(data_for_lm$Time, data_for_lm$Sales, main="Sales vs. Time", xlab="Time", ylab="Sales", col="blue")
+
+# Add the fitted line
+abline(lm_model, col="red")
+```
+
+```{r}
+# Predicting future sales for the next 12 months
+future_time_index <- (max(time_index) + 1):(max(time_index) + 12)
+future_data <- data.frame(Time = future_time_index)
+predictions <- predict(lm_model, newdata=future_data)
+
+# View the predictions
+predictions
+```
+
+```{r}
+library(zoo)
+sales_df <- data.frame(Date = time(sales_ts), 
+                       Sales = as.numeric(sales_ts))
+
+# Convert to year-month format
+sales_df$Date <- as.yearmon(sales_df$Date)
+```
+
+```{r}
+# Plot the data
+ggplotly(ggplot(sales_df, aes(x = Date, y = Sales)) + 
+  geom_line() + # Line plot
+  geom_point() + # Add points
+  labs(title = "Filtered Sales Data Over Time",
+       x = "Date",
+       y = "Sales") + 
+  theme_minimal() # Using a minimal theme for aesthetics
+)
+```
+
+```{r}
+# Add the forecasted value to the plot
+last_date <- sales_df$Date[nrow(sales_df)]
+
+# Calculate the next month's yearmon and convert it to Date for plotting
+next_month <- as.Date(as.yearmon(last_date), frac = 1) + months(1)
+
+# Create a new data frame for the forecasted value
+forecast_df <- data.frame(Date = next_month, Sales = sales_forecast$mean[1])
+
+# Plot the original data and the forecasted point
+ggplot(sales_df, aes(x = Date, y = Sales)) +
+  geom_line() + 
+  geom_point() +
+  geom_point(data = forecast_df, aes(x = Date, y = Sales), color = "red") +
+  labs(title = "Sales Data with Nowcast", x = "Date", y = "Sales") +
+  theme_minimal()
+
+```
+

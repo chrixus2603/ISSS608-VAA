@@ -12,7 +12,7 @@ editor: visual
 
 # 1. Overview
 
-In this take-home exercise, my goal is to apply my newly acquired knowledge of visual interactivity and visualizing uncertainty methods to create an analytics-driven data visualisation and enhancing user experience in data discovery and visual storytelling utilizing appropriate interactive techniques.
+In this take-home exercise, my goal is sto apply my newly acquired knowledge of visual interactivity and visualizing uncertainty methods to create an analytics-driven data visualisation and enhancing user experience in data discovery and visual storytelling utilizing appropriate interactive techniques.
 
 ![](images/Climate_change.jpg)
 
@@ -216,6 +216,7 @@ bscols(widths = c(6,6),
 Next, looking at the temperature change between these 5 years, the error bar can be plotted using confidence level of 0.65 , 0.95, and 0.99.
 
 ### 4.2.1 Data Preparation
+
 ```{r}
 temp_change <- avg_temp %>%
   mutate(change = avgvalue - lag(avgvalue, default = avgvalue[1]))
@@ -236,7 +237,8 @@ temp_change %>%
   scale_y_continuous("°C Change", breaks = seq(-.1,0.7,0.2), limits = c(-0.5,1)) +
   theme_minimal()
 ```
-From the error bar above, it shows the temperature difference for each year ranges between 0.02°C to 0.5 °C, with the 99% confidence level stating the temperature fluctuation to be between ~0°C to ~0.5°C.
+
+From the error bar above, it shows the temperature difference for each year ranges between 0.02°C to 0.5 °C, with the 99% confidence level stating the temperature fluctuation to be between \~0°C to \~0.5°C.
 
 # Conclusion
 
