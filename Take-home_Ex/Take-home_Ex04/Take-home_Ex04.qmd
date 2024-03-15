@@ -289,6 +289,118 @@ plot_ly() %>%
 
 # Shiny Storyboarding
 
+## Section 1: Historical
+
 ![](images/UI-Historical.png){width="781"}
 
+### UI Components
+
+-   **Title and Tabs:**
+
+Utilize `navbarPage` or `tabsetPanel` to create multiple tabs for "HISTORICAL" and "NOWCAST" data views. Use `titlePanel` for the main title "NOWCASTING STATE OF ECONOMIC IN SINGAPORE".
+
+-   **Sidebar for Input Selection:**
+
+Include a `sidebarPanel` for user inputs. Use `selectInput` for dropdowns to select the dataset, the start year, and the end year of the analysis. Apply `dateInput` or a combination of `numericInput` / `selectInput` if you need users to select specific months and years. Incorporate an `actionButton` labeled "Submit" to trigger the data processing and visualization.
+
+-   **Main Panel for Data Display:**
+
+Employ a `mainPanel` to display the plot and any text outputs. Use `plotOutput` to present the time series plot of the selected dataset. Implement `textOutput` or `verbatimTextOutput` to show any textual data or results from the server calculations.
+
+### Server Design
+
+-   **Data Processing and Reactive Elements:**
+
+Read in the datasets and prepare them using reactive expressions that will update when new user inputs are provided. Use `reactive` or `reactiveVal` for processing and storing the dataset based on user input.
+
+-   **Subset Data Based on User Selection:**
+
+Create reactive subsets of the data using the `reactive` function based on the start and end year/month selected by the user.
+
+-   **Linear Regression Model and Forecasting:**
+
+Once the user clicks the "Submit" button, trigger the event using `eventReactive` to fit the linear model and calculate the forecast. Store the results of the model fitting and forecasting for use in the output.
+
+-   **Plotting:**
+
+Use `renderPlot` to create and display the plot based on the reactive data and model results. Include logic to add the linear regression line and any forecasted data points to the plot dynamically.
+
+-   **Output Display:**
+
+Output the plot and any textual data using output\$YourOutputId \<- renderPlot({ ... }) for plots or `renderText` for textual output.
+
+-   **Example Server Skeleton:**
+
+```{r}
+#| eval: true
+server <- function(input, output, session) {
+    
+    data_reactive <- reactive({
+      
+    })
+    
+    observeEvent(input$submit, {
+      
+    })
+    
+    output$timeseriesPlot <- renderPlot({
+      
+    })
+    
+    # add other outputs like renderText for textual results
+}
+```
+
+## Section 2: Nowcasting
+
 ![](images/UI-Nowcasted.png){width="788"}
+
+### UI Components
+
+Having a lot of similarities with the Historical tab, I will focus more on the new components in the Nowcast tab:
+
+-   **Dropdown Inputs:**
+
+`selectInput` for selecting the forecasting method, with ARIMA as one of the options.
+
+-   **Numeric Input:**
+
+`numericInput` for "Forecast duration" where users can input the number of periods they want to forecast into the future.
+
+### Server Logic
+
+-   **Reactive Data Subset:**
+
+Reactive expressions that subset the data according to the user's selected start and end year.
+
+-   **ARIMA Model Fitting and Forecasting:**
+
+Upon clicking "Submit", use `eventReactive` to fit the ARIMA model to the subset data. Implement forecasting logic within `eventReactive` to generate nowcasts for the specified forecast duration.
+
+-   **Dynamic Plotting:**
+
+Use `renderPlot` to render the time series plot dynamically based on the input selections and the results of the ARIMA model. The plot should visually differentiate between historical and forecasted values.
+
+- **Example Server Skeleton:**
+
+```{r}
+#| eval: true
+server <- function(input, output, session) {
+  
+  data_reactive <- reactive({
+
+  })
+  
+  forecast_reactive <- eventReactive(input$submit, {
+
+  })
+  
+  output$nowcastPlot <- renderPlot({
+    data <- data_reactive()
+    forecasts <- forecast_reactive()
+    
+  })
+  
+  # add other outputs like renderText for textual results
+}
+```
