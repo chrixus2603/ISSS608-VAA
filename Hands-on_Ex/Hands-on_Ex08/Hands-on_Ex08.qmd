@@ -1,7 +1,7 @@
 ---
 title: "Hands-on Exercise 8: Modelling, Visualising and Analysing Network Data with R"
 author: "Chrissandro"
-date: "4th March 2024"
+date: "4 March 2024"
 date-modified: "last-modified"
 execute:
   warning: false

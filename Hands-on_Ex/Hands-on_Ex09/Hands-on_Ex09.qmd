@@ -1,7 +1,7 @@
 ---
 title: "Hands-on Exercise 9: Information Dashboard Design: R methods"
 author: "Chrissandro"
-date: "16th March 2024"
+date: "16 March 2024"
 date-modified: "last-modified"
 execute:
   warning: false
